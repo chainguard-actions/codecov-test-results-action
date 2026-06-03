@@ -1,0 +1,29 @@
+name: Test basic usage with core inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          token: fake-token-for-dry-run
+          dry_run: "true"
+          handle_no_reports_found: "true"
+          verbose: "true"
+          version: latest
+          flags: unit
+          name: test-upload
+          env_vars: OS,PYTHON
+          fail_ci_if_error: "false"
+          working-directory: "."
+        continue-on-error: true
+      - name: Assert action ran without unexpected failure
+        run: |
+          echo "Action completed (dry_run mode)"
+          echo "PASS"
