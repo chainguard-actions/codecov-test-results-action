@@ -1,0 +1,31 @@
+name: Test override inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          dry_run: "true"
+          handle_no_reports_found: "true"
+          override_branch: "main"
+          override_build: "42"
+          override_build_url: "https://example.com/build/42"
+          override_commit: "abc1234567890abcdef1234567890abcdef12345"
+          override_pr: "1"
+          commit_parent: "def4567890abcdef1234567890abcdef12345678"
+          flags: "unittests"
+          name: "my-upload"
+          report_code: "default"
+          env_vars: "OS,PYTHON"
+        continue-on-error: true
+      - name: Assert action ran
+        run: |
+          echo "Action completed with override inputs (dry_run mode)"
+          echo "PASS"

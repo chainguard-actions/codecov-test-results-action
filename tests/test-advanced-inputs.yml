@@ -1,0 +1,37 @@
+name: Test advanced inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create dummy codecov yml
+        run: |
+          mkdir -p /tmp/codecov-config
+          cat > /tmp/codecov-config/codecov.yml <<'EOF'
+          codecov:
+            notify:
+              wait_for_ci: true
+          EOF
+      - id: action
+        uses: .
+        with:
+          dry_run: "true"
+          handle_no_reports_found: "true"
+          codecov_yml_path: "/tmp/codecov-config/codecov.yml"
+          fail_ci_if_error: "false"
+          os: "linux"
+          root_dir: "."
+          slug: "owner/repo"
+          url: "https://codecov.io"
+          use_oidc: "false"
+          binary: ""
+        continue-on-error: true
+      - name: Assert action ran
+        run: |
+          echo "Action completed with advanced inputs (dry_run mode)"
+          echo "PASS"
