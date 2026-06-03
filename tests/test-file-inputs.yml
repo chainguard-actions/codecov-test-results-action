@@ -1,15 +1,12 @@
-name: Test file and override inputs
+name: Test file-related inputs
 on:
   workflow_dispatch:
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_REF: refs/heads/main
-      GITHUB_EVENT_NAME: push
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Create a dummy test result file
+      - name: Create dummy test result file
         run: |
           mkdir -p /tmp/test-results
           cat > /tmp/test-results/results.xml <<'EOF'
@@ -25,18 +22,15 @@ jobs:
         with:
           dry_run: "true"
           handle_no_reports_found: "true"
-          file: /tmp/test-results/results.xml
-          files: /tmp/test-results/results.xml
-          directory: /tmp/test-results
-          exclude: node_modules
+          file: "/tmp/test-results/results.xml"
+          files: "/tmp/test-results/results.xml"
+          directory: "/tmp/test-results"
+          exclude: "node_modules"
           disable_search: "false"
-          override_branch: main
-          override_build: "42"
-          override_build_url: https://example.com/builds/42
-          override_commit: abc1234def5678901234567890123456789012ab
-          override_pr: "1"
+          env_vars: "OS,PYTHON"
+          report_code: "test-report"
         continue-on-error: true
       - name: Assert action ran without unexpected failure
         run: |
-          echo "Action completed with file/override inputs (dry_run mode)"
+          echo "Action completed with file inputs (dry_run mode)"
           echo "PASS"
