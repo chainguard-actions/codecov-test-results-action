@@ -1,4 +1,4 @@
-name: Test override inputs
+name: Test binary input
 on:
   workflow_dispatch:
 jobs:
@@ -9,21 +9,19 @@ jobs:
       GITHUB_EVENT_NAME: push
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Download Codecov CLI binary
+        run: |
+          curl -Os https://cli.codecov.io/latest/linux/codecov
+          chmod +x codecov
+          echo "Binary downloaded to: $(pwd)/codecov"
       - id: action
         uses: .
         with:
           dry_run: "true"
           handle_no_reports_found: "true"
-          override_branch: main
-          override_build: "42"
-          override_build_url: https://example.com/build/42
-          override_commit: abc1234def5678901234567890123456789012ab
-          override_pr: "1"
-          commit_parent: abc1234def5678901234567890123456789012ab
-          report_code: test-report
-          env_vars: OS,PYTHON
+          binary: ./codecov
         continue-on-error: true
       - name: Assert action ran
         run: |
-          echo "Action completed with override inputs (dry_run mode)"
+          echo "Action completed with binary input (dry_run mode)"
           echo "PASS"

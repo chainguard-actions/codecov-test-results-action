@@ -16,7 +16,9 @@ jobs:
           dry_run: "true"
           handle_no_reports_found: "true"
           verbose: "true"
-          version: "latest"
+          version: latest
+          name: test-upload
+          flags: unittest
           working-directory: "."
         continue-on-error: true
       - name: Assert action ran
