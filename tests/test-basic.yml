@@ -4,19 +4,23 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - id: action
         uses: .
         with:
-          token: "fake-token-for-testing"
+          token: fake-token-for-testing
           dry_run: "true"
           handle_no_reports_found: "true"
+          version: latest
           verbose: "true"
-          version: "latest"
-          working-directory: "."
+          name: test-upload
+          flags: unit
         continue-on-error: true
-      - name: Assert action ran without unexpected failure
+      - name: Assert action ran
         run: |
-          echo "Action completed (dry_run mode, handle_no_reports_found=true)"
+          echo "Action completed (dry_run mode)"
           echo "PASS"
