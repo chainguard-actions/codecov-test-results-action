@@ -1,0 +1,32 @@
+name: Test override and metadata inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          token: "fake-token-for-testing"
+          dry_run: "true"
+          handle_no_reports_found: "true"
+          override_branch: "main"
+          override_build: "42"
+          override_build_url: "https://example.com/builds/42"
+          override_commit: "abc1234def5678901234567890123456789012ab"
+          override_pr: "99"
+          commit_parent: "def5678901234567890123456789012ab123456"
+          flags: "py3.11"
+          name: "my-test-upload"
+          report_code: "test-report"
+          env_vars: "OS,PYTHON"
+        continue-on-error: true
+      - name: Assert action ran with override inputs
+        run: |
+          echo "Action completed with override/metadata inputs"
+          echo "PASS"

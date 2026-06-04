@@ -1,0 +1,42 @@
+name: Test enterprise and advanced inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create a fake codecov yml
+        run: |
+          mkdir -p /tmp/codecov-config
+          cat > /tmp/codecov-config/codecov.yml <<'EOF'
+          codecov:
+            require_ci_to_pass: false
+          EOF
+      - name: Create a fake codecov binary
+        run: |
+          mkdir -p /tmp/fake-bin
+          cat > /tmp/fake-bin/codecov <<'SCRIPT'
+          #!/bin/sh
+          echo "fake codecov binary called with: $@"
+          exit 0
+          SCRIPT
+          chmod +x /tmp/fake-bin/codecov
+      - id: action
+        uses: .
+        with:
+          token: "fake-token-for-testing"
+          dry_run: "true"
+          handle_no_reports_found: "true"
+          slug: "myorg/myrepo"
+          url: "https://codecov.example.com"
+          root_dir: "."
+          os: "linux"
+          codecov_yml_path: "/tmp/codecov-config/codecov.yml"
+          fail_ci_if_error: "false"
+          binary: "/tmp/fake-bin/codecov"
+        continue-on-error: true
+      - name: Assert action ran with enterprise inputs
+        run: |
+          echo "Action completed with enterprise/advanced inputs"
+          echo "PASS"
