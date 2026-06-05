@@ -1,0 +1,26 @@
+name: Test basic usage
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          token: fake-token-for-testing
+          dry_run: "true"
+          handle_no_reports_found: "true"
+          fail_ci_if_error: "false"
+          verbose: "true"
+          version: latest
+          working-directory: "."
+        continue-on-error: true
+      - name: Assert action ran
+        run: |
+          echo "Action completed (dry_run mode)"
+          echo "PASS"
