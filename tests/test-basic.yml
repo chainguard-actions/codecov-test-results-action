@@ -15,10 +15,12 @@ jobs:
           token: fake-token-for-testing
           dry_run: "true"
           handle_no_reports_found: "true"
-          fail_ci_if_error: "false"
           verbose: "true"
           version: latest
           working-directory: "."
+          flags: unit
+          name: test-upload
+          fail_ci_if_error: "false"
         continue-on-error: true
       - name: Assert action ran
         run: |

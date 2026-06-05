@@ -1,4 +1,4 @@
-name: Test override inputs
+name: Test override and enterprise inputs
 on:
   workflow_dispatch:
 jobs:
@@ -9,25 +9,32 @@ jobs:
       GITHUB_EVENT_NAME: push
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create dummy codecov yml
+        run: |
+          mkdir -p /tmp/codecov-config
+          cat > /tmp/codecov-config/codecov.yml <<'EOF'
+          codecov:
+            require_ci_to_pass: false
+          EOF
       - id: action
         uses: .
         with:
-          token: fake-token-for-testing
           dry_run: "true"
           handle_no_reports_found: "true"
-          fail_ci_if_error: "false"
           override_branch: main
           override_build: "42"
           override_build_url: https://example.com/builds/42
           override_commit: abc1234def5678901234567890123456789012ab
           override_pr: "1"
           commit_parent: abc1234def5678901234567890123456789012ab
-          report_code: my-report
-          flags: unit
-          name: my-upload
-          env_vars: OS,PYTHON
+          slug: myorg/myrepo
+          url: https://codecov.io
+          os: linux
+          root_dir: "."
+          codecov_yml_path: /tmp/codecov-config/codecov.yml
+          fail_ci_if_error: "false"
         continue-on-error: true
       - name: Assert action ran
         run: |
-          echo "Action completed with override inputs"
+          echo "Action completed with override inputs (dry_run mode)"
           echo "PASS"
