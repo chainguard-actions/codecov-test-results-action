@@ -1,4 +1,4 @@
-name: Test file-related inputs
+name: Test file and directory inputs
 on:
   workflow_dispatch:
 jobs:
@@ -9,14 +9,14 @@ jobs:
       GITHUB_EVENT_NAME: push
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Create dummy test result files
+      - name: Create test result file
         run: |
           mkdir -p /tmp/test-results
-          cat > /tmp/test-results/results.xml <<'EOF'
+          cat > /tmp/test-results/results.xml << 'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
           <testsuites>
             <testsuite name="example" tests="1" failures="0">
-              <testcase name="test_example" classname="example"/>
+              <testcase name="test_pass" classname="example"/>
             </testsuite>
           </testsuites>
           EOF
@@ -25,16 +25,13 @@ jobs:
         with:
           dry_run: "true"
           handle_no_reports_found: "true"
+          directory: /tmp/test-results
+          disable_search: "false"
           file: /tmp/test-results/results.xml
           files: /tmp/test-results/results.xml
-          directory: /tmp/test-results
           exclude: node_modules
-          disable_search: "false"
-          env_vars: OS,PYTHON
-          report_code: test-report
-          fail_ci_if_error: "false"
         continue-on-error: true
       - name: Assert action ran
         run: |
-          echo "Action completed with file inputs (dry_run mode)"
+          echo "Action completed with file/directory inputs (dry_run mode)"
           echo "PASS"

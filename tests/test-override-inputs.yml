@@ -1,4 +1,4 @@
-name: Test override and enterprise inputs
+name: Test override and metadata inputs
 on:
   workflow_dispatch:
 jobs:
@@ -9,13 +9,6 @@ jobs:
       GITHUB_EVENT_NAME: push
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Create dummy codecov yml
-        run: |
-          mkdir -p /tmp/codecov-config
-          cat > /tmp/codecov-config/codecov.yml <<'EOF'
-          codecov:
-            require_ci_to_pass: false
-          EOF
       - id: action
         uses: .
         with:
@@ -25,14 +18,10 @@ jobs:
           override_build: "42"
           override_build_url: https://example.com/builds/42
           override_commit: abc1234def5678901234567890123456789012ab
-          override_pr: "1"
+          override_pr: "123"
           commit_parent: abc1234def5678901234567890123456789012ab
-          slug: myorg/myrepo
-          url: https://codecov.io
-          os: linux
-          root_dir: "."
-          codecov_yml_path: /tmp/codecov-config/codecov.yml
-          fail_ci_if_error: "false"
+          report_code: test-report
+          env_vars: OS,PYTHON
         continue-on-error: true
       - name: Assert action ran
         run: |
