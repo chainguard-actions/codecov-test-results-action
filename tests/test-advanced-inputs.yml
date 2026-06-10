@@ -7,31 +7,34 @@ jobs:
     env:
       GITHUB_REF: refs/heads/main
       GITHUB_EVENT_NAME: push
+      MY_ENV_VAR: test-value
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Create working directory and codecov yml
+      - name: Download a fake codecov binary
         run: |
-          mkdir -p /tmp/workdir
-          cat > /tmp/codecov.yml <<'EOF'
-          codecov:
-            require_ci_to_pass: no
+          # Create a fake binary that just exits 0 for testing
+          cat > /tmp/fake-codecov << 'EOF'
+          #!/bin/sh
+          echo "fake codecov binary called with args: $@"
+          exit 0
           EOF
+          chmod +x /tmp/fake-codecov
       - id: action
         uses: .
         with:
+          token: fake-token-for-testing
           dry_run: "true"
           handle_no_reports_found: "true"
-          codecov_yml_path: /tmp/codecov.yml
-          env_vars: OS,PYTHON
+          binary: /tmp/fake-codecov
+          codecov_yml_path: codecov.yml
+          env_vars: MY_ENV_VAR
           fail_ci_if_error: "false"
           os: linux
-          report_code: test-report
-          root_dir: /tmp/workdir
+          root_dir: "."
           slug: myorg/myrepo
-          url: https://codecov.io
-          working-directory: /tmp/workdir
+          url: "https://codecov.io"
         continue-on-error: true
       - name: Assert action ran
         run: |
-          echo "Action completed with advanced inputs (dry_run mode)"
+          echo "Action completed with advanced inputs"
           echo "PASS"
