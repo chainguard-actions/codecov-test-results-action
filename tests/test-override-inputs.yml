@@ -1,4 +1,4 @@
-name: Test override and enterprise inputs
+name: Test override and metadata inputs
 on:
   workflow_dispatch:
 jobs:
@@ -14,21 +14,17 @@ jobs:
         with:
           dry_run: "true"
           handle_no_reports_found: "true"
-          override_branch: "main"
+          override_branch: main
           override_build: "42"
-          override_build_url: "https://example.com/builds/42"
-          override_commit: "abc1234def5678901234567890123456789012ab"
-          override_pr: "123"
-          commit_parent: "def5678901234567890123456789012345678abc"
-          slug: "myorg/myrepo"
-          url: "https://codecov.io"
-          os: "linux"
-          root_dir: "."
-          codecov_yml_path: ".codecov.yml"
-          use_oidc: "false"
-          binary: ""
+          override_build_url: https://example.com/builds/42
+          override_commit: abc1234def5678901234567890123456789012ab
+          override_pr: "99"
+          flags: unit
+          name: my-test-upload
+          env_vars: OS,PYTHON
+          report_code: default
         continue-on-error: true
-      - name: Assert action ran without unexpected failure
+      - name: Assert action ran
         run: |
-          echo "Action completed with override inputs (dry_run mode)"
+          echo "Action completed with override/metadata inputs"
           echo "PASS"
