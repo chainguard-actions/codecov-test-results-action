@@ -18,7 +18,7 @@ jobs:
           verbose: "true"
           version: latest
           name: test-upload
-          flags: unittest
+          flags: unit
           working-directory: "."
         continue-on-error: true
       - name: Assert action ran

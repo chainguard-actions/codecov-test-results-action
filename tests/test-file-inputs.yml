@@ -12,7 +12,7 @@ jobs:
       - name: Create dummy test result file
         run: |
           mkdir -p /tmp/test-results
-          echo '<testsuites><testsuite name="test" tests="1"></testsuite></testsuites>' > /tmp/test-results/results.xml
+          echo '<testsuites></testsuites>' > /tmp/test-results/results.xml
       - id: action
         uses: .
         with:

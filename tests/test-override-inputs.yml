@@ -16,7 +16,7 @@ jobs:
           handle_no_reports_found: "true"
           override_branch: main
           override_build: "42"
-          override_build_url: https://example.com/build/42
+          override_build_url: https://example.com/builds/42
           override_commit: abc1234def5678901234567890123456789012ab
           override_pr: "1"
           commit_parent: abc1234def5678901234567890123456789012ab
