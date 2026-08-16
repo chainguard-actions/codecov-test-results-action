@@ -1,0 +1,61 @@
+name: Test basic dry run with fake binary
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create fake Codecov CLI binary
+        run: |
+          mkdir -p /tmp/fake-codecov-bin
+          cat > /tmp/fake-codecov-bin/codecov << 'EOF'
+          #!/bin/sh
+          echo "Fake Codecov CLI invoked with args: $*"
+          # Check that do-upload and --report-type test_results are present
+          found_do_upload=0
+          found_report_type=0
+          found_dry_run=0
+          prev=""
+          for arg in "$@"; do
+            if [ "$arg" = "do-upload" ]; then
+              found_do_upload=1
+            fi
+            if [ "$arg" = "--report-type" ]; then
+              found_report_type=1
+            fi
+            if [ "$arg" = "-d" ]; then
+              found_dry_run=1
+            fi
+          done
+          if [ "$found_do_upload" = "0" ]; then
+            echo "ERROR: do-upload command not found in args"
+            exit 1
+          fi
+          if [ "$found_report_type" = "0" ]; then
+            echo "ERROR: --report-type not found in args"
+            exit 1
+          fi
+          if [ "$found_dry_run" = "0" ]; then
+            echo "ERROR: -d (dry_run) not found in args"
+            exit 1
+          fi
+          echo "All expected args found. Dry run successful."
+          exit 0
+          EOF
+          chmod +x /tmp/fake-codecov-bin/codecov
+
+      - name: Run action with fake binary and dry_run
+        id: action
+        uses: .
+        with:
+          binary: /tmp/fake-codecov-bin/codecov
+          dry_run: "true"
+          handle_no_reports_found: "true"
+          fail_ci_if_error: "true"
+
+      - name: Assert action completed successfully
+        run: |
+          echo "Action completed without error"
+          echo "PASS"

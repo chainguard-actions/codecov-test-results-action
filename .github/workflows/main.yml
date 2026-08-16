@@ -1,0 +1,62 @@
+name: Workflow for Codecov Action
+on: [pull_request]
+
+jobs:
+  run:
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest, ubuntu-24.04-arm]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Install dependencies
+        run: npm install
+      - name: Lint
+        run: npm run lint
+      - name: Upload test results to Codecov (calculator)
+        uses: ./
+        with:
+          fail_ci_if_error: true
+          files: ./demo/calculator/junit.xml,
+          flags: ${{ matrix.os }}
+          verbose: true
+          token: ${{ secrets.CODECOV_ORG_TOKEN }}
+      - name: Upload test results to Codecov (calculator) (oidc)
+        uses: ./
+        with:
+          use_oidc: true
+          fail_ci_if_error: true
+          files: ./demo/calculator/junit.xml
+          flags: ${{ matrix.os }}
+          verbose: true
+      - name: Upload test results to Codecov (demo)
+        uses: ./
+        with:
+          fail_ci_if_error: true
+          files: ./demo/coverage-test/junit.xml
+          flags: ${{ matrix.os }}
+          verbose: true
+          token: ${{ secrets.CODECOV_ORG_TOKEN }}
+      - name: Upload test results to Codecov (calculator) (staging)
+        uses: ./
+        with:
+          fail_ci_if_error: true
+          files: ./demo/calculator/junit.xml
+          flags: ${{ matrix.os }}
+          verbose: true
+          url: ${{ secrets.CODECOV_STAGING_URL }}
+          token: ${{ secrets.CODECOV_ORG_TOKEN_STAGING }}
+      - name: Upload test results to Codecov (demo) (staging)
+        uses: ./
+        with:
+          fail_ci_if_error: true
+          url: ${{ secrets.CODECOV_STAGING_URL }}
+          token: ${{ secrets.CODECOV_ORG_TOKEN_STAGING }}
+          files: ./demo/coverage-test/junit.xml
+          flags: ${{ matrix.os }}
+          verbose: true

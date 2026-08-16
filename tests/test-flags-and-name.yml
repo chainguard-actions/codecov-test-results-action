@@ -1,0 +1,55 @@
+name: Test flags and name inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create fake Codecov CLI binary that checks flags and name
+        run: |
+          mkdir -p /tmp/fake-codecov-bin
+          cat > /tmp/fake-codecov-bin/codecov << 'EOF'
+          #!/bin/sh
+          echo "Fake Codecov CLI invoked with args: $*"
+          found_flag=0
+          found_name=0
+          prev=""
+          for arg in "$@"; do
+            if [ "$prev" = "-F" ] && [ "$arg" = "unit" ]; then
+              found_flag=1
+            fi
+            if [ "$prev" = "-n" ] && [ "$arg" = "my-upload" ]; then
+              found_name=1
+            fi
+            prev="$arg"
+          done
+          if [ "$found_flag" = "0" ]; then
+            echo "ERROR: -F unit flag not found in args"
+            exit 1
+          fi
+          if [ "$found_name" = "0" ]; then
+            echo "ERROR: -n my-upload name not found in args"
+            exit 1
+          fi
+          echo "Flags and name args verified. Success."
+          exit 0
+          EOF
+          chmod +x /tmp/fake-codecov-bin/codecov
+
+      - name: Run action with flags and name inputs
+        id: action
+        uses: .
+        with:
+          binary: /tmp/fake-codecov-bin/codecov
+          flags: "unit"
+          name: "my-upload"
+          dry_run: "true"
+          handle_no_reports_found: "true"
+          fail_ci_if_error: "true"
+
+      - name: Assert action completed successfully
+        run: |
+          echo "Action completed with flags and name inputs"
+          echo "PASS"

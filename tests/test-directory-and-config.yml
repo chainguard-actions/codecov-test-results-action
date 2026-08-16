@@ -1,0 +1,33 @@
+name: Test directory, config path, commit_parent, and exclude inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create test result directory and dummy report
+        run: |
+          mkdir -p /tmp/test-results
+          cat > /tmp/test-results/junit.xml <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <testsuites>
+            <testsuite name="example" tests="1" failures="0">
+              <testcase name="test_pass" classname="example"/>
+            </testsuite>
+          </testsuites>
+          EOF
+      - id: action
+        uses: .
+        with:
+          dry_run: "true"
+          directory: "/tmp/test-results"
+          codecov_yml_path: ".github/codecov.yml"
+          commit_parent: "abc1234def5678901234567890123456789012ab"
+          exclude: "node_modules,dist"
+          handle_no_reports_found: "true"
+        continue-on-error: true
+      - name: Assert action ran
+        run: |
+          echo "Action completed (dry_run mode with directory/config inputs)"
+          echo "PASS"

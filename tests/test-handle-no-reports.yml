@@ -1,0 +1,43 @@
+name: Test handle_no_reports_found flag
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create fake Codecov CLI binary that checks handle-no-reports-found
+        run: |
+          mkdir -p /tmp/fake-codecov-bin
+          cat > /tmp/fake-codecov-bin/codecov << 'EOF'
+          #!/bin/sh
+          echo "Fake Codecov CLI invoked with args: $*"
+          found_handle=0
+          for arg in "$@"; do
+            if [ "$arg" = "--handle-no-reports-found" ]; then
+              found_handle=1
+            fi
+          done
+          if [ "$found_handle" = "0" ]; then
+            echo "ERROR: --handle-no-reports-found not found in args"
+            exit 1
+          fi
+          echo "handle-no-reports-found flag verified. Success."
+          exit 0
+          EOF
+          chmod +x /tmp/fake-codecov-bin/codecov
+
+      - name: Run action with handle_no_reports_found
+        id: action
+        uses: .
+        with:
+          binary: /tmp/fake-codecov-bin/codecov
+          handle_no_reports_found: "true"
+          dry_run: "true"
+          fail_ci_if_error: "true"
+
+      - name: Assert action completed successfully
+        run: |
+          echo "Action completed with handle_no_reports_found"
+          echo "PASS"

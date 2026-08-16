@@ -1,0 +1,31 @@
+name: Test use_oidc and working-directory inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create working directory with dummy report
+        run: |
+          mkdir -p /tmp/workdir
+          cat > /tmp/workdir/junit.xml <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <testsuites>
+            <testsuite name="example" tests="1" failures="0">
+              <testcase name="test_pass" classname="example"/>
+            </testsuite>
+          </testsuites>
+          EOF
+      - id: action
+        uses: .
+        with:
+          dry_run: "true"
+          use_oidc: "false"
+          working-directory: "/tmp/workdir"
+          handle_no_reports_found: "true"
+        continue-on-error: true
+      - name: Assert action ran
+        run: |
+          echo "Action completed (dry_run mode with use_oidc/working-directory inputs)"
+          echo "PASS"

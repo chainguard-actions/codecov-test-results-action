@@ -1,0 +1,58 @@
+name: Test file upload with specific test result file
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create a sample JUnit XML test result file
+        run: |
+          cat > /tmp/test-results.xml << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <testsuites>
+            <testsuite name="example" tests="1" failures="0" errors="0" time="0.1">
+              <testcase name="test_example" classname="example" time="0.1"/>
+            </testsuite>
+          </testsuites>
+          EOF
+
+      - name: Create fake Codecov CLI binary that checks file arg
+        run: |
+          mkdir -p /tmp/fake-codecov-bin
+          cat > /tmp/fake-codecov-bin/codecov << 'EOF'
+          #!/bin/sh
+          echo "Fake Codecov CLI invoked with args: $*"
+          found_file=0
+          prev=""
+          for arg in "$@"; do
+            if [ "$prev" = "-f" ]; then
+              echo "File arg found: $arg"
+              found_file=1
+            fi
+            prev="$arg"
+          done
+          if [ "$found_file" = "0" ]; then
+            echo "ERROR: -f (file) argument not found in args"
+            exit 1
+          fi
+          echo "File upload args verified. Success."
+          exit 0
+          EOF
+          chmod +x /tmp/fake-codecov-bin/codecov
+
+      - name: Run action with specific file input
+        id: action
+        uses: .
+        with:
+          binary: /tmp/fake-codecov-bin/codecov
+          file: /tmp/test-results.xml
+          dry_run: "true"
+          handle_no_reports_found: "true"
+          fail_ci_if_error: "true"
+
+      - name: Assert action completed successfully
+        run: |
+          echo "Action completed with file input"
+          echo "PASS"
