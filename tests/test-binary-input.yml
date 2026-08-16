@@ -1,27 +1,27 @@
-name: Test binary input
+name: Test binary input (pre-downloaded CLI)
 on:
   workflow_dispatch:
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_REF: refs/heads/main
-      GITHUB_EVENT_NAME: push
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Download codecov CLI binary
+      - name: Create a fake codecov binary
         run: |
-          curl -Os https://cli.codecov.io/latest/linux/codecov
-          chmod +x codecov
-          echo "Binary downloaded to $(pwd)/codecov"
+          mkdir -p /tmp/fake-codecov-bin
+          cat > /tmp/fake-codecov-bin/codecov <<'EOF'
+          #!/bin/sh
+          # Fake codecov CLI for testing
+          echo "Fake codecov CLI invoked with args: $*"
+          exit 0
+          EOF
+          chmod +x /tmp/fake-codecov-bin/codecov
       - id: action
         uses: .
         with:
+          binary: "/tmp/fake-codecov-bin/codecov"
           dry_run: "true"
           handle_no_reports_found: "true"
-          binary: ./codecov
-        continue-on-error: true
-      - name: Assert action ran
+      - name: Assert action completed
         run: |
-          echo "Action completed with binary input (dry_run mode)"
-          echo "PASS"
+          echo "PASS: action completed with binary input"

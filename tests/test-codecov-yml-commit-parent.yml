@@ -1,0 +1,26 @@
+name: Test codecov_yml_path, commit_parent, use_oidc inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create a dummy codecov.yml
+        run: |
+          mkdir -p /tmp/codecov-config
+          cat > /tmp/codecov-config/codecov.yml <<'EOF'
+          codecov:
+            require_ci_to_pass: false
+          EOF
+      - id: action
+        uses: .
+        with:
+          codecov_yml_path: "/tmp/codecov-config/codecov.yml"
+          commit_parent: "0000000000000000000000000000000000000000"
+          use_oidc: "false"
+          dry_run: "true"
+          handle_no_reports_found: "true"
+      - name: Assert action completed
+        run: |
+          echo "PASS: action completed with codecov_yml_path, commit_parent, use_oidc inputs"

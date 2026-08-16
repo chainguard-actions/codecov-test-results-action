@@ -1,0 +1,22 @@
+name: Test token, version, os, working-directory inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create working directory
+        run: mkdir -p /tmp/test-workdir
+      - id: action
+        uses: .
+        with:
+          token: "dummy-token-for-dry-run"
+          version: "latest"
+          os: "linux"
+          working-directory: /tmp/test-workdir
+          dry_run: "true"
+          handle_no_reports_found: "true"
+      - name: Assert action completed
+        run: |
+          echo "PASS: action completed with token, version, os, working-directory inputs"

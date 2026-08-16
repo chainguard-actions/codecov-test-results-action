@@ -1,0 +1,23 @@
+name: Test specific file upload
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          file: ${{ github.workspace }}/pristine/codecov--test-results-action/v1.2.1/junit.xml
+          dry_run: "true"
+          verbose: "true"
+          name: "test-upload"
+          flags: "unit"
+      - name: Assert action completed with specific file
+        run: |
+          echo "Action completed successfully with specific junit.xml file"
+          echo "PASS"

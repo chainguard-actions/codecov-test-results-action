@@ -1,0 +1,22 @@
+name: Test disable search with explicit file
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          file: ${{ github.workspace }}/pristine/codecov--test-results-action/v1.2.1/junit.xml
+          disable_search: "true"
+          dry_run: "true"
+          verbose: "true"
+      - name: Assert action completed with disable_search
+        run: |
+          echo "Action completed successfully with disable_search=true and explicit file"
+          echo "PASS"
