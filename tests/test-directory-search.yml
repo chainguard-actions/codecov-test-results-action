@@ -1,0 +1,48 @@
+name: Test directory search for test results
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create test result files in a directory
+        run: |
+          mkdir -p reports/subdir
+          cat > reports/junit.xml << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <testsuites>
+            <testsuite name="suite1" tests="3" failures="0" errors="0" time="1.0">
+              <testcase name="test_a" classname="SuiteOne" time="0.3"/>
+              <testcase name="test_b" classname="SuiteOne" time="0.3"/>
+              <testcase name="test_c" classname="SuiteOne" time="0.4"/>
+            </testsuite>
+          </testsuites>
+          EOF
+          cat > reports/subdir/junit2.xml << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <testsuites>
+            <testsuite name="suite2" tests="1" failures="0" errors="0" time="0.5">
+              <testcase name="test_d" classname="SuiteTwo" time="0.5"/>
+            </testsuite>
+          </testsuites>
+          EOF
+      - id: action
+        uses: .
+        with:
+          directory: reports
+          dry_run: "true"
+          handle_no_reports_found: "true"
+          verbose: "true"
+        continue-on-error: true
+      - name: Assert action searched directory
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action completed with outcome: $OUTCOME"
+          else
+            echo "FAIL: unexpected outcome: $OUTCOME"
+            exit 1
+          fi

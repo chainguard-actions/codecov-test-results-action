@@ -1,4 +1,4 @@
-name: Test enterprise and root_dir inputs
+name: Test override build and commit inputs
 on:
   workflow_dispatch:
 jobs:
@@ -6,18 +6,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Create a temp root dir
-        run: mkdir -p /tmp/project-root
       - id: action
         uses: .
         with:
-          slug: 'myorg/myrepo'
-          url: 'https://codecov.example.com'
-          root_dir: '/tmp/project-root'
+          override_commit: 'abc1234def5678901234567890123456789abcde'
+          commit_parent: '0000000000000000000000000000000000000000'
+          override_build: '42'
+          override_build_url: 'https://example.com/builds/42'
           dry_run: 'true'
           handle_no_reports_found: 'true'
         continue-on-error: true
       - name: Assert action ran
         run: |
-          echo "Action completed (dry_run mode with slug/url/root_dir inputs)"
+          echo "Action completed (dry_run mode with override build/commit inputs)"
           echo "PASS"

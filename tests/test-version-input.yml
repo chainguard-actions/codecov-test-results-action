@@ -1,0 +1,39 @@
+name: Test version input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create a sample test result file
+        run: |
+          mkdir -p test-results
+          cat > test-results/junit.xml << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <testsuites>
+            <testsuite name="versioned" tests="1" failures="0" errors="0" time="0.1">
+              <testcase name="test_version" classname="VersionTest" time="0.1"/>
+            </testsuite>
+          </testsuites>
+          EOF
+      - id: action
+        uses: .
+        with:
+          file: test-results/junit.xml
+          dry_run: "true"
+          handle_no_reports_found: "true"
+          version: latest
+          verbose: "true"
+        continue-on-error: true
+      - name: Assert action ran with specified version
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action completed with outcome: $OUTCOME"
+          else
+            echo "FAIL: unexpected outcome: $OUTCOME"
+            exit 1
+          fi

@@ -1,0 +1,37 @@
+name: Test pull request event
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/pull/1/merge
+      GITHUB_EVENT_NAME: pull_request
+      GITHUB_HEAD_REF: feature-branch
+      GITHUB_BASE_REF: main
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create a dummy test result file
+        run: |
+          mkdir -p /tmp/test-results
+          cat > /tmp/test-results/junit.xml <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <testsuites>
+            <testsuite name="example" tests="1" failures="0" errors="0">
+              <testcase name="test_example" classname="example" time="0.001"/>
+            </testsuite>
+          </testsuites>
+          EOF
+      - id: action
+        uses: .
+        with:
+          dry_run: "true"
+          file: "/tmp/test-results/junit.xml"
+          flags: "unittests"
+          override_branch: "feature-branch"
+          override_pr: "1"
+          verbose: "true"
+      - name: Assert action completed without error
+        run: |
+          echo "Action completed successfully for pull_request event in dry_run mode"
+          echo "PASS"

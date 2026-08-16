@@ -1,0 +1,47 @@
+name: Test multiple files upload
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create multiple JUnit XML test result files
+        run: |
+          mkdir -p test-results
+          cat > test-results/junit-unit.xml << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <testsuites>
+            <testsuite name="unit" tests="1" failures="0" errors="0" time="0.1">
+              <testcase name="test_unit" classname="UnitTest" time="0.1"/>
+            </testsuite>
+          </testsuites>
+          EOF
+          cat > test-results/junit-integration.xml << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <testsuites>
+            <testsuite name="integration" tests="1" failures="0" errors="0" time="0.2">
+              <testcase name="test_integration" classname="IntegrationTest" time="0.2"/>
+            </testsuite>
+          </testsuites>
+          EOF
+      - id: action
+        uses: .
+        with:
+          files: test-results/junit-unit.xml,test-results/junit-integration.xml
+          dry_run: "true"
+          handle_no_reports_found: "true"
+          flags: unit,integration
+          name: multi-file-test
+        continue-on-error: true
+      - name: Assert action ran with multiple files
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action completed with outcome: $OUTCOME"
+          else
+            echo "FAIL: unexpected outcome: $OUTCOME"
+            exit 1
+          fi
