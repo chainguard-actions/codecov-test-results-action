@@ -1,0 +1,25 @@
+name: Test handle no reports found
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create empty directory with no test results
+        run: |
+          mkdir -p /tmp/empty-results
+
+      - id: action
+        uses: .
+        with:
+          directory: /tmp/empty-results
+          dry_run: "true"
+          handle_no_reports_found: "true"
+          verbose: "true"
+
+      - name: Assert action completed without error when no reports found
+        run: |
+          echo "Action completed successfully with handle_no_reports_found=true and no reports present"
+          echo "PASS"

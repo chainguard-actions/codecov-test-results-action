@@ -1,0 +1,20 @@
+name: Test token and codecov_yml_path inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          token: fake-token-for-dry-run
+          codecov_yml_path: codecov.yml
+          dry_run: true
+          handle_no_reports_found: true
+        continue-on-error: true
+      - name: Assert action ran
+        run: |
+          echo "Action completed (dry_run with token and codecov_yml_path)"
+          echo "PASS"

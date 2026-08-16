@@ -1,0 +1,45 @@
+name: Test dry run with flags and name
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create sample JUnit XML test result files
+        run: |
+          mkdir -p /tmp/flagged-results
+          cat > /tmp/flagged-results/unit-tests.xml << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <testsuites>
+            <testsuite name="UnitSuite" tests="3" failures="0" errors="0" time="1.0">
+              <testcase name="test_unit_one" classname="UnitSuite" time="0.3"/>
+              <testcase name="test_unit_two" classname="UnitSuite" time="0.3"/>
+              <testcase name="test_unit_three" classname="UnitSuite" time="0.4"/>
+            </testsuite>
+          </testsuites>
+          EOF
+          cat > /tmp/flagged-results/integration-tests.xml << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <testsuites>
+            <testsuite name="IntegrationSuite" tests="1" failures="0" errors="0" time="2.0">
+              <testcase name="test_integration_one" classname="IntegrationSuite" time="2.0"/>
+            </testsuite>
+          </testsuites>
+          EOF
+
+      - id: action
+        uses: .
+        with:
+          files: "/tmp/flagged-results/unit-tests.xml,/tmp/flagged-results/integration-tests.xml"
+          dry_run: "true"
+          disable_search: "true"
+          flags: "unit,integration"
+          name: "my-test-upload"
+          verbose: "true"
+
+      - name: Assert action completed with flags and name
+        run: |
+          echo "Action completed successfully with flags and name in dry-run mode"
+          echo "PASS"

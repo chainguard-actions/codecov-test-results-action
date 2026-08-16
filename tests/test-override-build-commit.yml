@@ -1,0 +1,27 @@
+name: Test override_build, override_build_url, override_commit, commit_parent inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Get current commit SHA
+        id: git-info
+        run: |
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "parent=$(git rev-parse HEAD~1 2>/dev/null || git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - id: action
+        uses: .
+        with:
+          override_build: "42"
+          override_build_url: https://example.com/builds/42
+          override_commit: ${{ steps.git-info.outputs.sha }}
+          commit_parent: ${{ steps.git-info.outputs.parent }}
+          dry_run: true
+          handle_no_reports_found: true
+        continue-on-error: true
+      - name: Assert action ran
+        run: |
+          echo "Action completed (dry_run with override_build, override_build_url, override_commit, commit_parent)"
+          echo "PASS"

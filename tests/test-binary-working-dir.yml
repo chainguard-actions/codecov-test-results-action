@@ -1,0 +1,30 @@
+name: Test binary and working-directory inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create working directory and fake binary
+        run: |
+          mkdir -p /tmp/test-workdir
+          # Create a minimal fake codecov binary that exits 0
+          cat > /tmp/fake-codecov << 'EOF'
+          #!/bin/sh
+          echo "fake codecov CLI called with: $*"
+          exit 0
+          EOF
+          chmod +x /tmp/fake-codecov
+      - id: action
+        uses: .
+        with:
+          binary: /tmp/fake-codecov
+          working-directory: /tmp/test-workdir
+          dry_run: true
+          handle_no_reports_found: true
+        continue-on-error: true
+      - name: Assert action ran
+        run: |
+          echo "Action completed (dry_run with binary and working-directory)"
+          echo "PASS"

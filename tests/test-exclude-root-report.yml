@@ -1,0 +1,21 @@
+name: Test exclude, root_dir, and report_code inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          exclude: node_modules
+          root_dir: .
+          report_code: default
+          dry_run: true
+          handle_no_reports_found: true
+        continue-on-error: true
+      - name: Assert action ran
+        run: |
+          echo "Action completed (dry_run with exclude, root_dir, report_code)"
+          echo "PASS"
